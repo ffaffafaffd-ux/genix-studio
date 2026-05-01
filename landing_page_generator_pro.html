@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENIX — AI Landing Page Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Grotesk:wght@300;400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #050505;
+    --surface: #0d0d0d;
+    --border: rgba(255,255,255,0.08);
+    --accent: #7c6dfa;
+    --accent2: #fa6d9e;
+    --text: #f0f0f0;
+    --muted: rgba(240,240,240,0.45);
+    --success: #00e5a0;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --glass: rgba(255,255,255,0.04);
+    --radius: 16px;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(124,109,250,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -30%;
+    right: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(250,109,158,0.10) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 28px 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .logo span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: rgba(124,109,250,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(124,109,250,0.3);
+  }
+
+  /* HERO */
+  .hero {
+    padding: 52px 0 40px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: clamp(32px, 6vw, 56px);
+    line-height: 1;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+  .api-status {
+    display: inline-flex;
+    gap: 20px;
+    padding: 10px 20px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 0;
+  }
+  .api-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #555;
+    display: inline-block;
+    margin-right: 5px;
+    transition: background 0.3s;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  .api-status .dot.ok { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .api-status .dot.err { background: var(--danger); }
+  .api-status .dot.warn { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin: 40px 0 28px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* MAIN FORM */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  label .req { color: var(--accent); }
+
+  input[type=text], textarea, select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    width: 100%;
+    resize: vertical;
+  }
+  input[type=text]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,109,250,0.15);
+  }
+  input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.2); }
+  select option { background: #111; }
+
+  .color-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .color-chip {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .color-chip:hover { transform: scale(1.12); }
+  .color-chip.selected { border-color: #fff; }
+  .color-input { width: 70px !important; height: 30px; padding: 2px 6px; }
+
+  /* API CONFIG */
+  .config-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .config-card h3 {
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .config-card h3 .icon { font-size: 16px; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+  .hint a { color: var(--accent); text-decoration: none; }
+
+  /* BUTTON */
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(124,109,250,0.35);
+  }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* PROGRESS */
+  #progress-wrap {
+    display: none;
+    margin-top: 24px;
+  }
+  .progress-bar-bg {
+    height: 3px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+  .log-box {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #a0a0a0;
+    min-height: 120px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .log-box .log-line { display: block; margin-bottom: 2px; }
+  .log-box .log-ok { color: var(--success); }
+  .log-box .log-warn { color: var(--warning); }
+  .log-box .log-err { color: var(--danger); }
+  .log-box .log-info { color: var(--accent); }
+  .log-box .log-dim { color: #444; }
+
+  /* RESULT */
+  #result-wrap {
+    display: none;
+    margin-top: 24px;
+  }
+  .result-card {
+    background: rgba(0,229,160,0.06);
+    border: 1px solid rgba(0,229,160,0.25);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+  .result-icon { font-size: 40px; margin-bottom: 10px; }
+  .result-card h2 {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .result-card p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .result-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--success);
+    color: #000;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    border: none;
+    font-family: var(--font-body);
+  }
+  .result-link:hover { opacity: 0.85; }
+  .result-links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .result-link.secondary {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* ERROR */
+  #error-wrap {
+    display: none;
+    margin-top: 16px;
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--danger);
+    line-height: 1.6;
+  }
+
+  /* PREVIEW */
+  #preview-iframe {
+    display: none;
+    width: 100%;
+    height: 480px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-top: 14px;
+    background: #000;
+  }
+
+  /* CODE PREVIEW */
+  #code-preview-wrap {
+    display: none;
+    margin-top: 14px;
+  }
+  #code-preview {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #a0e0ff;
+    max-height: 200px;
+    overflow: auto;
+    white-space: pre;
+    line-height: 1.5;
+  }
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    font-family: var(--font-body);
+    margin-top: 8px;
+  }
+  .copy-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 32px 0 24px;
+    color: rgba(255,255,255,0.2);
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+    letter-spacing: 0.5px;
+  }
+
+  /* TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .toggle-label { font-size: 12px; color: var(--text); }
+  .toggle-sub { font-size: 11px; color: var(--muted); }
+  .toggle {
+    width: 40px; height: 22px;
+    background: var(--border);
+    border-radius: 100px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.2s;
+  }
+  .toggle.on::after { left: 21px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">GEN<span>IX</span></div>
+    <div class="badge">Elite AI Studio</div>
+  </header>
+
+  <div class="hero">
+    <h1>AI que cria sites<br><span class="grad">cinematográficos</span></h1>
+    <p>Gera, publica no GitHub e faz deploy na Vercel em segundos. Powered by Claude Sonnet.</p>
+    <div class="api-status" id="apiStatus">
+      <span><span class="dot" id="d-claude"></span>Claude</span>
+      <span><span class="dot" id="d-github"></span>GitHub</span>
+      <span><span class="dot" id="d-vercel"></span>Vercel</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('form')">🎨 Design</button>
+    <button class="tab-btn" onclick="switchTab('config')">🔑 APIs</button>
+    <button class="tab-btn" onclick="switchTab('preview')">👁 Preview</button>
+  </div>
+
+  <!-- TAB: FORM -->
+  <div class="section active" id="tab-form">
+    <div class="form-grid">
+      <div class="field">
+        <label>Nome da Empresa <span class="req">*</span></label>
+        <input type="text" id="nome" placeholder="Ex: Clínica Luminus" maxlength="40">
+      </div>
+      <div class="field">
+        <label>Nicho / Segmento <span class="req">*</span></label>
+        <select id="nicho">
+          <option value="">Selecione...</option>
+          <option value="Clínica Estética">Clínica Estética</option>
+          <option value="Clínica Odontológica">Clínica Odontológica</option>
+          <option value="Clínica de Psicologia">Clínica de Psicologia</option>
+          <option value="Academia & Fitness">Academia & Fitness</option>
+          <option value="Restaurante & Gastronomia">Restaurante & Gastronomia</option>
+          <option value="Loja de Moda">Loja de Moda</option>
+          <option value="Escritório de Advocacia">Escritório de Advocacia</option>
+          <option value="Imobiliária de Luxo">Imobiliária de Luxo</option>
+          <option value="Agência de Marketing">Agência de Marketing</option>
+          <option value="Consultoria Empresarial">Consultoria Empresarial</option>
+          <option value="Studio de Arquitetura">Studio de Arquitetura</option>
+          <option value="Outro">Outro (descreva abaixo)</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Diferencial Principal <span class="req">*</span></label>
+        <input type="text" id="diferencial" placeholder="Ex: Tecnologia européia + atendimento personalizado 24h" maxlength="120">
+      </div>
+      <div class="field full">
+        <label>Serviços / Especialidades</label>
+        <textarea id="servicos" rows="2" placeholder="Liste os principais serviços (separados por vírgula)&#10;Ex: Botox, Preenchimento, Harmonização Facial, Limpeza de Pele"></textarea>
+      </div>
+      <div class="field full">
+        <label>Depoimento de Cliente (Prova Social)</label>
+        <textarea id="depoimento" rows="2" placeholder="Ex: &quot;Transformou minha vida! Resultado incrível e profissionalismo raro.&quot; — Ana Paula, São Paulo"></textarea>
+      </div>
+      <div class="field">
+        <label>WhatsApp / Contato</label>
+        <input type="text" id="whatsapp" placeholder="+55 11 99999-9999">
+      </div>
+      <div class="field">
+        <label>Estilo Visual</label>
+        <select id="estilo">
+          <option value="Dark Luxury">Dark Luxury (padrão)</option>
+          <option value="Editorial Minimalista">Editorial Minimalista</option>
+          <option value="Neobrutalist">Neobrutalist Bold</option>
+          <option value="Organic Premium">Organic Premium</option>
+          <option value="Tech Futurista">Tech Futurista</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Paleta de Cores</label>
+        <div class="color-row" id="colorPicker">
+          <div class="color-chip selected" style="background:#7c6dfa" data-color="#7c6dfa" onclick="selectColor(this)"></div>
+          <div class="color-chip" style="background:#fa6d9e" data-color="#fa6d9e" onclick="selectColor(this)"></div>
+          <div class="color-chip" style="background:#00e5a0" data-color="#00e5a0" onclick="selectColor(this)"></div>
+          <div class="color-chip" style="background:#fbbf24" data-color="#fbbf24" onclick="selectColor(this)"></div>
+          <div class="color-chip" style="background:#60a5fa" data-color="#60a5fa" onclick="selectColor(this)"></div>
+          <div class="color-chip" style="background:#f97316" data-color="#f97316" onclick="selectColor(this)"></div>
+          <div class="color-chip" style="background:#e879f9" data-color="#e879f9" onclick="selectColor(this)"></div>
+          <input type="color" class="color-chip color-input" id="customColor" value="#7c6dfa" onchange="selectCustomColor(this)">
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">🚀 Deploy automático na Vercel</div>
+        <div class="toggle-sub">Publica online após gerar o código</div>
+      </div>
+      <button class="toggle on" id="toggleVercel" onclick="toggleFeature('vercel',this)"></button>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">📦 Criar repositório no GitHub</div>
+        <div class="toggle-sub">Salva o código-fonte automaticamente</div>
+      </div>
+      <button class="toggle on" id="toggleGithub" onclick="toggleFeature('github',this)"></button>
+    </div>
+
+    <button class="btn-primary" id="genBtn" onclick="generate()">⚡ Gerar Landing Page</button>
+
+    <div id="error-wrap"></div>
+    <div id="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+      <div class="log-box" id="logBox"></div>
+    </div>
+    <div id="result-wrap"></div>
+  </div>
+
+  <!-- TAB: CONFIG -->
+  <div class="section" id="tab-config">
+    <div class="config-card">
+      <h3><span class="icon">🤖</span> Claude (Anthropic)</h3>
+      <div class="field">
+        <label>API Key</label>
+        <input type="text" id="claudeKey" placeholder="sk-ant-api03-..." autocomplete="off">
+        <div class="hint">Necessária para geração do código. <a href="https://console.anthropic.com" target="_blank">console.anthropic.com →</a></div>
+      </div>
+    </div>
+    <div class="config-card">
+      <h3><span class="icon">🐙</span> GitHub</h3>
+      <div class="field">
+        <label>Personal Access Token</label>
+        <input type="text" id="githubToken" placeholder="ghp_xxxxxxxxxx" autocomplete="off">
+        <div class="hint">Permissão: <strong>repo</strong>. <a href="https://github.com/settings/tokens/new" target="_blank">Gerar token →</a></div>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Usuário GitHub</label>
+        <input type="text" id="githubUser" placeholder="seu-usuario">
+      </div>
+    </div>
+    <div class="config-card">
+      <h3><span class="icon">▲</span> Vercel</h3>
+      <div class="field">
+        <label>Access Token</label>
+        <input type="text" id="vercelToken" placeholder="xxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+        <div class="hint">Scope: <strong>Full Account</strong>. <a href="https://vercel.com/account/tokens" target="_blank">Gerar token →</a></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveConfig()">💾 Salvar Configurações</button>
+    <div id="config-status" style="margin-top:10px;font-size:12px;text-align:center;color:var(--muted);"></div>
+  </div>
+
+  <!-- TAB: PREVIEW -->
+  <div class="section" id="tab-preview">
+    <div id="code-preview-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label>Código Gerado (page.tsx)</label>
+        <button class="copy-btn" onclick="copyCode()">📋 Copiar código</button>
+      </div>
+      <div id="code-preview"></div>
+    </div>
+    <div id="no-code-msg" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:13px">
+      <div style="font-size:40px;margin-bottom:12px">🖥</div>
+      Gere uma landing page para ver o código aqui
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">GENIX Elite Studio — Powered by Claude Sonnet · GitHub · Vercel</div>
+</footer>
+
+<script>
+let state = {
+  color: '#7c6dfa',
+  features: { vercel: true, github: true },
+  generatedCode: '',
+  deployedUrl: '',
+  repoUrl: ''
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['form','config','preview'][i] === tab);
+  });
+  document.querySelectorAll('.section').forEach((s,i) => {
+    s.classList.toggle('active', ['tab-form','tab-config','tab-preview'][i] === 'tab-'+tab);
+  });
+}
+
+function selectColor(el) {
+  document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.color = el.dataset.color;
+}
+
+function selectCustomColor(el) {
+  state.color = el.value;
+  document.querySelectorAll('.color-chip:not(.color-input)').forEach(c => c.classList.remove('selected'));
+}
+
+function toggleFeature(feat, el) {
+  state.features[feat] = !state.features[feat];
+  el.classList.toggle('on', state.features[feat]);
+}
+
+function loadConfig() {
+  try {
+    const c = JSON.parse(localStorage.getItem('genix_cfg') || '{}');
+    if (c.claudeKey) document.getElementById('claudeKey').value = c.claudeKey;
+    if (c.githubToken) document.getElementById('githubToken').value = c.githubToken;
+    if (c.githubUser) document.getElementById('githubUser').value = c.githubUser;
+    if (c.vercelToken) document.getElementById('vercelToken').value = c.vercelToken;
+    updateApiDots(c);
+  } catch(e) {}
+}
+
+function saveConfig() {
+  const cfg = {
+    claudeKey: document.getElementById('claudeKey').value.trim(),
+    githubToken: document.getElementById('githubToken').value.trim(),
+    githubUser: document.getElementById('githubUser').value.trim(),
+    vercelToken: document.getElementById('vercelToken').value.trim()
+  };
+  localStorage.setItem('genix_cfg', JSON.stringify(cfg));
+  updateApiDots(cfg);
+  document.getElementById('config-status').innerHTML = '<span style="color:var(--success)">✓ Configurações salvas!</span>';
+  setTimeout(() => { document.getElementById('config-status').textContent = ''; }, 3000);
+}
+
+function getConfig() {
+  try { return JSON.parse(localStorage.getItem('genix_cfg') || '{}'); } catch(e) { return {}; }
+}
+
+function updateApiDots(cfg) {
+  document.getElementById('d-claude').className = 'dot ' + (cfg.claudeKey ? 'ok' : 'err');
+  document.getElementById('d-github').className = 'dot ' + (cfg.githubToken ? 'ok' : 'warn');
+  document.getElementById('d-vercel').className = 'dot ' + (cfg.vercelToken ? 'ok' : 'warn');
+}
+
+function log(msg, type='') {
+  const box = document.getElementById('logBox');
+  const line = document.createElement('span');
+  line.className = 'log-line log-' + (type||'dim');
+  line.textContent = msg;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setProgress(p) {
+  document.getElementById('progressBar').style.width = p + '%';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-wrap');
+  el.style.display = 'block';
+  el.innerHTML = '⚠️ ' + msg;
+}
+
+function hideError() { document.getElementById('error-wrap').style.display = 'none'; }
+
+async function generate() {
+  hideError();
+  const cfg = getConfig();
+  const nome = document.getElementById('nome').value.trim();
+  const nicho = document.getElementById('nicho').value;
+  const diferencial = document.getElementById('diferencial').value.trim();
+  const servicos = document.getElementById('servicos').value.trim();
+  const depoimento = document.getElementById('depoimento').value.trim();
+  const whatsapp = document.getElementById('whatsapp').value.trim();
+  const estilo = document.getElementById('estilo').value;
+
+  if (!nome || !nicho || !diferencial) {
+    showError('Preencha: Nome, Nicho e Diferencial para gerar a página.');
+    return;
+  }
+  if (!cfg.claudeKey) {
+    showError('Configure sua Claude API Key na aba <strong>APIs</strong> antes de gerar.');
+    return;
+  }
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando...';
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('result-wrap').style.display = 'none';
+  document.getElementById('logBox').innerHTML = '';
+  setProgress(0);
+
+  log('> Iniciando pipeline de geração...', 'info');
+  log('> Cliente: ' + nome + ' | Nicho: ' + nicho);
+  log('> Estilo: ' + estilo + ' | Cor: ' + state.color);
+
+  // STEP 1: Claude generate code
+  setProgress(10);
+  log('> [1/4] Enviando prompt ao Claude Sonnet...', 'info');
+
+  const prompt = buildPrompt(nome, nicho, diferencial, servicos, depoimento, whatsapp, estilo, state.color);
+  let generatedCode = '';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': cfg.claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error('Claude API: ' + (err.error?.message || res.status));
+    }
+
+    const data = await res.json();
+    generatedCode = data.content?.[0]?.text || '';
+
+    // Extract code from markdown if needed
+    const match = generatedCode.match(/```(?:tsx?|jsx?|html)?\n?([\s\S]+?)```/);
+    if (match) generatedCode = match[1];
+
+    if (!generatedCode || generatedCode.length < 200) {
+      throw new Error('Claude retornou código inválido ou vazio. Verifique sua API key.');
+    }
+
+    state.generatedCode = generatedCode;
+    setProgress(35);
+    log('> ✓ Código gerado! (' + generatedCode.length + ' chars)', 'ok');
+
+    // Show code preview
+    document.getElementById('code-preview').textContent = generatedCode.slice(0, 2000) + (generatedCode.length > 2000 ? '\n\n... (truncado para preview)' : '');
+    document.getElementById('code-preview-wrap').style.display = 'block';
+    document.getElementById('no-code-msg').style.display = 'none';
+
+  } catch(e) {
+    log('> ✗ Erro no Claude: ' + e.message, 'err');
+    showError('Erro ao chamar Claude: ' + e.message);
+    resetBtn(btn);
+    return;
+  }
+
+  // STEP 2: GitHub
+  let repoUrl = '';
+  let repoFullName = '';
+  if (state.features.github && cfg.githubToken && cfg.githubUser) {
+    setProgress(45);
+    log('> [2/4] Criando repositório no GitHub...', 'info');
+    const repoName = 'landing-' + nome.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-') + '-' + Date.now().toString(36);
+    try {
+      const createRes = await fetch('https://api.github.com/user/repos', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'token ' + cfg.githubToken,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github+json'
+        },
+        body: JSON.stringify({
+          name: repoName,
+          description: 'Landing Page gerada por GENIX AI — ' + nome,
+          private: false,
+          auto_init: false
+        })
+      });
+      if (!createRes.ok) throw new Error((await createRes.json()).message || createRes.status);
+      const repo = await createRes.json();
+      repoFullName = repo.full_name;
+      repoUrl = repo.html_url;
+      log('> ✓ Repositório criado: ' + repoFullName, 'ok');
+      setProgress(55);
+
+      // Push file
+      const content = btoa(unescape(encodeURIComponent(generatedCode)));
+      const pushRes = await fetch(`https://api.github.com/repos/${repoFullName}/contents/app/page.tsx`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'token ' + cfg.githubToken,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github+json'
+        },
+        body: JSON.stringify({
+          message: 'feat: landing page gerada por GENIX AI',
+          content: content
+        })
+      });
+      if (!pushRes.ok) throw new Error((await pushRes.json()).message || pushRes.status);
+      log('> ✓ page.tsx enviado ao GitHub!', 'ok');
+      setProgress(65);
+      state.repoUrl = repoUrl;
+    } catch(e) {
+      log('> ✗ GitHub: ' + e.message + ' (continuando sem GitHub)', 'warn');
+    }
+  } else if (state.features.github) {
+    log('> ⚠ GitHub pulado (configure token + usuário na aba APIs)', 'warn');
+  } else {
+    log('> GitHub desabilitado.', 'dim');
+  }
+
+  // STEP 3: Vercel deploy
+  let vercelUrl = '';
+  if (state.features.vercel && cfg.vercelToken) {
+    setProgress(70);
+    log('> [3/4] Iniciando deploy na Vercel...', 'info');
+    try {
+      const htmlWrapper = buildHtmlPreview(generatedCode, nome, state.color);
+      const deployRes = await fetch('https://api.vercel.com/v13/deployments', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + cfg.vercelToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: ('genix-' + nome.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,30)),
+          files: [
+            {
+              file: 'index.html',
+              data: htmlWrapper
+            },
+            {
+              file: 'package.json',
+              data: JSON.stringify({ name: 'landing', version: '1.0.0' })
+            }
+          ],
+          projectSettings: { framework: null },
+          target: 'production'
+        })
+      });
+      if (!deployRes.ok) {
+        const err = await deployRes.json().catch(() => ({}));
+        throw new Error(err.error?.message || deployRes.status);
+      }
+      const deploy = await deployRes.json();
+      setProgress(85);
+      log('> ⏳ Deploy em progresso... (ID: ' + deploy.id?.slice(0,12) + ')', 'info');
+
+      // Poll for ready
+      let attempts = 0;
+      while (attempts < 20) {
+        await sleep(3000);
+        const pollRes = await fetch('https://api.vercel.com/v13/deployments/' + deploy.id, {
+          headers: { 'Authorization': 'Bearer ' + cfg.vercelToken }
+        });
+        if (pollRes.ok) {
+          const d = await pollRes.json();
+          if (d.readyState === 'READY' || d.status === 'READY') {
+            vercelUrl = 'https://' + (d.url || deploy.url || deploy.id + '.vercel.app');
+            break;
+          }
+          if (d.readyState === 'ERROR' || d.status === 'ERROR') {
+            throw new Error('Deploy falhou no servidor Vercel');
+          }
+        }
+        attempts++;
+        log('> ⏳ Aguardando Vercel... tentativa ' + (attempts) + '/20', 'dim');
+      }
+      if (!vercelUrl && deploy.url) vercelUrl = 'https://' + deploy.url;
+      if (vercelUrl) {
+        state.deployedUrl = vercelUrl;
+        log('> ✓ Site publicado: ' + vercelUrl, 'ok');
+      } else {
+        log('> ⚠ Timeout no Vercel — pode ainda estar em deploy', 'warn');
+      }
+    } catch(e) {
+      log('> ✗ Vercel: ' + e.message, 'warn');
+    }
+  } else if (state.features.vercel) {
+    log('> ⚠ Vercel pulado (configure token na aba APIs)', 'warn');
+  } else {
+    log('> Vercel desabilitado.', 'dim');
+  }
+
+  setProgress(100);
+  log('> [4/4] Pipeline concluído! 🎉', 'ok');
+
+  // Show result
+  showResult(nome, vercelUrl, repoUrl);
+  resetBtn(btn);
+}
+
+function showResult(nome, vercelUrl, repoUrl) {
+  const wrap = document.getElementById('result-wrap');
+  wrap.style.display = 'block';
+  const hasLive = !!vercelUrl;
+  wrap.innerHTML = `
+    <div class="result-card">
+      <div class="result-icon">🚀</div>
+      <h2>${hasLive ? 'Site no ar!' : 'Código gerado!'}</h2>
+      <p>${hasLive ? 'Landing page de <strong>' + nome + '</strong> publicada com sucesso.' : 'Código pronto para deploy manual.'}</p>
+      <div class="result-links">
+        ${hasLive ? `<button class="result-link" onclick="openLink('${vercelUrl}')">🌐 Abrir Site</button>` : ''}
+        ${repoUrl ? `<button class="result-link secondary" onclick="openLink('${repoUrl}')">🐙 Ver no GitHub</button>` : ''}
+        <button class="result-link secondary" onclick="switchTab('preview')">📄 Ver Código</button>
+      </div>
+    </div>`;
+}
+
+function openLink(url) {
+  window.open(url, '_blank');
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(state.generatedCode || '').then(() => {
+    document.querySelector('.copy-btn').textContent = '✓ Copiado!';
+    setTimeout(() => { document.querySelector('.copy-btn').textContent = '📋 Copiar código'; }, 2000);
+  });
+}
+
+function resetBtn(btn) {
+  btn.disabled = false;
+  btn.textContent = '⚡ Gerar Landing Page';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function buildPrompt(nome, nicho, diferencial, servicos, depoimento, whatsapp, estilo, cor) {
+  return `Você é um web designer premiado pelo Awwwards. Crie uma landing page HTML completa, moderna, cinematográfica e auto-contida (tudo em um único arquivo HTML com CSS e JS inline).
+
+DADOS DO CLIENTE:
+- Nome/Empresa: ${nome}
+- Nicho: ${nicho}
+- Diferencial: ${diferencial}
+- Serviços: ${servicos || 'Não especificado'}
+- Depoimento: ${depoimento || 'Não fornecido'}
+- WhatsApp: ${whatsapp || '#'}
+- Estilo: ${estilo}
+- Cor de destaque: ${cor}
+
+REQUISITOS TÉCNICOS OBRIGATÓRIOS:
+1. HTML5 completo e auto-contido (um único arquivo .html)
+2. CSS moderno com variáveis, gradientes, glassmorphism
+3. Animações CSS e JavaScript nativas (sem dependências externas)
+4. Responsivo (mobile-first)
+5. Fundo escuro (#050505 ou #000) com acentos na cor ${cor}
+6. Tipografia impactante com Google Fonts (importar via @import)
+7. Efeitos: parallax, fade-in ao scroll, hover tilt nos cards
+
+SEÇÕES OBRIGATÓRIAS:
+1. Navbar sticky com logo e botão CTA
+2. Hero com headline gigante animada e subtítulo
+3. Seção de diferenciais/features (3-4 cards com ícones SVG)
+4. Vitrine de serviços (cards com hover effect)
+5. Depoimento/prova social
+6. Seção CTA final com botão de ação
+7. Footer minimalista
+8. Botão flutuante do WhatsApp (link: https://wa.me/${whatsapp.replace(/\D/g,'') || '5511999999999'})
+
+REGRAS:
+- Retorne APENAS o código HTML completo, começando com <!DOCTYPE html>
+- Não use frameworks externos, apenas HTML/CSS/JS puro
+- Efeito de "reveal" nos textos ao fazer scroll (IntersectionObserver)
+- Cursor customizado com efeito glow seguindo o mouse
+- Fundo com partículas ou grade sutil animada`;
+}
+
+function buildHtmlPreview(code, nome, cor) {
+  // If code is already HTML, use it; otherwise wrap
+  if (code.trim().startsWith('<!DOCTYPE') || code.trim().startsWith('<html')) {
+    return code;
+  }
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${nome}</title>
+<style>
+body { margin:0; background:#050505; color:#fff; font-family:system-ui,sans-serif; }
+.hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:40px 20px; }
+h1 { font-size:clamp(40px,10vw,100px); font-weight:900; letter-spacing:-3px; margin:0 0 20px; background:linear-gradient(135deg,#fff,${cor}); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+p { color:rgba(255,255,255,0.5); font-size:18px; max-width:500px; }
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>${nome}</h1>
+<p>Gerado por GENIX AI</p>
+</div>
+<div style="white-space:pre;display:none">${code.replace(/</g,'&lt;')}</div>
+</body></html>`;
+}
+
+// Init
+loadConfig();
+</script>
+</body>
+</html>
